@@ -1,0 +1,8 @@
+-- DU LIEU MO PHONG. Tao schema lts_muon_thiet_bi rieng truoc khi chay.
+
+CREATE TABLE nguoi_muon(idNguoiMuon INT PRIMARY KEY AUTO_INCREMENT,tenNguoiMuon VARCHAR(100) NOT NULL,lop VARCHAR(30) NOT NULL) ENGINE=InnoDB;
+CREATE TABLE thiet_bi(idThietBi INT PRIMARY KEY AUTO_INCREMENT,maTaiSan VARCHAR(30) NOT NULL UNIQUE,tenThietBi VARCHAR(100) NOT NULL) ENGINE=InnoDB;
+CREATE TABLE luot_muon(idLuotMuon INT PRIMARY KEY AUTO_INCREMENT,idNguoiMuon INT NOT NULL,idThietBi INT NOT NULL,ngayMuon DATE NOT NULL,ngayTra DATE,CONSTRAINT fk_muon_nguoi FOREIGN KEY(idNguoiMuon) REFERENCES nguoi_muon(idNguoiMuon) ON DELETE RESTRICT,CONSTRAINT fk_muon_thietbi FOREIGN KEY(idThietBi) REFERENCES thiet_bi(idThietBi) ON DELETE RESTRICT) ENGINE=InnoDB;
+INSERT INTO nguoi_muon VALUES(1,'An','11A1'),(2,'Bình','11A2'),(3,'Chi','11A1'),(4,'Duy','11A3'),(5,'Hà','11A2'),(6,'Khánh','11A1'),(7,'Linh','11A3'),(8,'Minh','11A2');
+INSERT INTO thiet_bi VALUES(1,'TB001','Máy ảnh'),(2,'TB002','Máy ảnh'),(3,'TB003','Micro'),(4,'TB004','Micro'),(5,'TB005','Chân máy'),(6,'TB006','Chân máy'),(7,'TB007','Máy tính'),(8,'TB008','Máy tính'),(9,'TB009','Bảng vẽ'),(10,'TB010','Bảng vẽ');
+INSERT INTO luot_muon VALUES(1,1,1,'2026-09-01','2026-09-02'),(2,2,3,'2026-09-01','2026-09-03'),(3,3,5,'2026-09-02','2026-09-03'),(4,4,7,'2026-09-02','2026-09-04'),(5,5,9,'2026-09-03','2026-09-04'),(6,6,2,'2026-09-03','2026-09-04'),(7,7,4,'2026-09-04','2026-09-05'),(8,8,6,'2026-09-04','2026-09-05'),(9,1,8,'2026-09-05','2026-09-06'),(10,2,10,'2026-09-05','2026-09-06'),(11,3,1,'2026-09-06','2026-09-07'),(12,4,3,'2026-09-06','2026-09-07'),(13,5,5,'2026-09-07',NULL),(14,6,7,'2026-09-07',NULL),(15,7,9,'2026-09-08',NULL),(16,8,2,'2026-09-08',NULL),(17,1,4,'2026-09-09',NULL),(18,2,6,'2026-09-09',NULL);

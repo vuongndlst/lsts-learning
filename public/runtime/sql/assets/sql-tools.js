@@ -1,0 +1,31 @@
+window.SQLTools=(()=>{
+ 'use strict';
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const labels={fk:'Tham chiếu chưa hợp lệ',unique:'Giá trị khóa bị trùng',required:'Thiếu giá trị bắt buộc',table:'Chưa tìm thấy bảng',column:'Chưa tìm thấy trường',ambiguous:'Tên trường chưa rõ bảng',syntax:'Cú pháp SQL cần chỉnh',dialect:'Khác môi trường SQL',type:'Giá trị không phù hợp',timeout:'Truy vấn chạy quá lâu',other:'Cần kiểm tra câu lệnh'};
+ function diagnose(error,code=''){
+  const raw=String(error.message||error);let kind='other',why='Engine chưa thực thi được câu lệnh. Đọc thông báo và kiểm tra cấu trúc bảng.',hint='Thử từng câu lệnh ngắn; đối chiếu tên bảng, trường và các giá trị.',next='Chạy SELECT trên bảng cần dùng rồi thêm từng mệnh đề để tìm phần gây lỗi.';
+  if(/CREATE\s+DATABASE|\bAUTO_INCREMENT\b|^\s*USE\s+/i.test(code)&&/syntax|near/i.test(raw)){kind='dialect';why='Câu lệnh đang dùng cú pháp MySQL, trong khi web chạy SQLite.';hint='Đối chiếu nhãn môi trường bên cạnh trình soạn.';next='SQLite web đã có CSDL riêng; dùng INTEGER PRIMARY KEY AUTOINCREMENT. CREATE DATABASE và USE thực hành trên MySQL/HeidiSQL.'}
+  else if(/FOREIGN KEY/i.test(raw)){kind='fk';why='Giá trị khóa ngoài không có bản ghi cha tương ứng, hoặc thao tác xóa/sửa làm mất tham chiếu.';hint='Xác định bảng con, trường FK và bảng cha. Kiểm tra mã trước khi thêm.';next=/\b999\b/.test(code)&&/idNguoiMuon/.test(code)?'Thử SELECT idNguoiMuon FROM nguoi_muon WHERE idNguoiMuon = 999; Nếu không có dòng, chọn ID đã tồn tại hoặc tạo bản ghi cha hợp lệ.':'Xem cấu trúc FK; truy vấn bảng cha theo mã đang nhập. Khi xóa, kiểm tra các dòng con đang tham chiếu trước.'}
+  else if(/UNIQUE constraint/i.test(raw)){kind='unique';why='Một giá trị vi phạm ràng buộc UNIQUE hoặc PRIMARY KEY.';hint='Hai bản ghi không được có cùng giá trị khóa cần duy nhất.';next='SELECT các dòng có mã đó. Nếu sửa bản ghi đã có, cân nhắc UPDATE với WHERE đúng ID; nếu thêm mới, chọn mã chưa tồn tại.'}
+  else if(/NOT NULL/i.test(raw)){kind='required';why='Trường bắt buộc đang nhận NULL hoặc chưa được cung cấp giá trị.';hint='Xem tên trường trong thông báo kỹ thuật và đối chiếu cấu trúc.';next='Bổ sung giá trị hợp lệ trong INSERT/UPDATE. Chuỗi rỗng và NULL là hai giá trị khác nhau.'}
+  else if(/no such table/i.test(raw)){kind='table';why='Bảng được gọi chưa tồn tại trong sandbox hiện tại.';hint='Kiểm tra tên bảng và việc đã chạy CREATE TABLE hay chưa.';next='Xem cấu trúc đang có. Đổi bài/đặt lại có thể đưa CSDL về mẫu; khôi phục bản sao lưu nếu muốn dùng bảng đã tạo trước đó.'}
+  else if(/ambiguous column/i.test(raw)){kind='ambiguous';why='Có nhiều bảng cùng chứa trường này; engine chưa biết con muốn dùng bảng nào.';hint='Sau JOIN, dùng tên bảng hoặc bí danh trước trường.';next='Ví dụ: n.idNguoiMuon và l.idNguoiMuon. Chỉ định rõ trường trong SELECT, ON và WHERE.'}
+  else if(/no such column/i.test(raw)){kind='column';why='Engine không tìm thấy trường hoặc biểu thức được viết trong câu lệnh.';hint='Kiểm tra tên trường, bí danh bảng và dấu nháy cho giá trị văn bản.';next="Văn bản dùng nháy đơn, ví dụ WHERE lop = '11A1'. Đối chiếu tên trường với bảng cấu trúc thực tế."}
+  else if(/datatype mismatch/i.test(raw)){kind='type';why='Giá trị không phù hợp với ràng buộc kiểu tại vị trí đang ghi.';hint='Kiểm tra cột khóa INTEGER PRIMARY KEY và giá trị được đưa vào.';next='Dùng ID số nguyên hợp lệ. Lưu ý SQLite có quy tắc kiểu linh hoạt hơn MySQL; không suy rằng mọi trường hợp nhập sai kiểu đều bị từ chối.'}
+  else if(/5 giây|too long|quá lâu/i.test(raw)){kind='timeout';why='Truy vấn vượt giới hạn chạy của web; sandbox đã dừng.';hint='Kiểm tra JOIN thiếu điều kiện hoặc truy vấn tạo quá nhiều dòng.';next='Đặt lại hoặc khôi phục bản sao lưu rồi thử truy vấn nhỏ hơn, có điều kiện ON/WHERE phù hợp.'}
+  else if(/syntax|near|incomplete input|misuse/i.test(raw)){kind='syntax';why='Câu lệnh chưa đúng cú pháp hoặc dùng biểu thức sai vị trí.';hint='Kiểm tra dấu phẩy, ngoặc, dấu nháy và thứ tự các mệnh đề.';next='Với SELECT cơ bản: SELECT cột FROM bảng WHERE điều_kiện ORDER BY cột; WHERE và ORDER BY chỉ thêm khi cần.'}
+  return {kind,title:labels[kind],why,hint,next,technical:raw.slice(0,1400)};
+ }
+ function errorHTML(d){return `<div class="sql-help"><b>${esc(d.title)}</b><p>${esc(d.why)}</p><p><b>Gợi ý 1:</b> ${esc(d.hint)}</p><details><summary>Gợi ý 2 · hướng kiểm tra tiếp</summary><p>${esc(d.next)}</p></details><details><summary>Thông báo kỹ thuật</summary><pre>${esc(d.technical)}</pre></details></div>`}
+ function summary(result){return {ok:true,...(typeof result.matched==='boolean'?{matched:result.matched}:{}),changed:result.changed||0,ms:result.ms||0,results:(result.results||[]).slice(-2).map(r=>({columns:r.columns.slice(0,8),total:r.total,values:r.values.slice(0,5).map(row=>row.slice(0,8).map(v=>typeof v==='string'?v.slice(0,120):v))}))}}
+ function resultsHTML(r){return (r.results||[]).map(x=>`<p>${x.total} dòng</p><div class="table-wrap"><table><thead><tr>${x.columns.map(c=>`<th scope="col">${esc(c)}</th>`).join('')}</tr></thead><tbody>${x.values.map(row=>`<tr>${row.map(v=>`<td>${v===null?'<i>NULL</i>':esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`).join('')||`Đã thực thi · ${r.changed||0} dòng bị tác động.`}
+ function engine(){
+  let worker=new Worker('assets/sql-worker.js'),sequence=0;const requests=new Map();
+  const close=()=>{worker?.terminate();worker=null;for(const q of requests.values()){clearTimeout(q.timer);q.reject(Error('Sandbox riêng đã đóng.'))}requests.clear()};
+  worker.onmessage=e=>{const q=requests.get(e.data.id);if(!q)return;clearTimeout(q.timer);requests.delete(e.data.id);e.data.ok?q.resolve(e.data):q.reject(Error(e.data.error))};
+  worker.onerror=()=>close();
+  const ask=(action,payload={})=>new Promise((resolve,reject)=>{if(!Cloud.user||!Cloud.contentLoaded||!worker){reject(Error('Cần đăng nhập và mở lại sandbox.'));return}const id=++sequence,timer=setTimeout(()=>{close();reject(Error('Truy vấn quá 5 giây.'))},5000);requests.set(id,{resolve,reject,timer});worker.postMessage({id,action,...payload})});
+  return {ask,close};
+ }
+ return {esc,labels,diagnose,errorHTML,summary,resultsHTML,engine};
+})();

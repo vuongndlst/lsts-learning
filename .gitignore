@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.npm-cache/
+.env*
+_Private/
+_Tests/
+.supabase/
+supabase/.temp/
+__pycache__/
+*.dpapi
+*.credentials.json

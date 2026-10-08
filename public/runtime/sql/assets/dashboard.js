@@ -1,0 +1,23 @@
+window.SQLDashboard=(()=>{
+ const {esc}=SQLTools;
+ const progress=p=>Array.isArray(p.progress)?p.progress:[];
+ function cellState(g){if(g?.completed)return 'done';if(g?.lastError||Object.entries(g?.checkTries||{}).some(([i,n])=>Number(n)>=3&&!g.passed?.includes(Number(i))))return 'help';if(g?.taskDone||g?.passed?.length||g?.attempts)return 'active';return 'empty'}
+ const names={done:'Hoàn thành tự học',help:'Cần xem xét hỗ trợ',active:'Đang học',empty:'Chưa ghi nhận hoạt động'};
+ function mount(root,data,options={}){
+  const container=root.querySelector('#student-table'),search=root.querySelector('#student-filter');
+  search.insertAdjacentHTML('beforebegin',`<div class="form-grid"><label class="field">Lớp học thuật<select id="class-filter"><option value="">Tất cả lớp</option>${[...new Set(data.students.map(s=>s.class_label))].sort().map(c=>`<option value="${esc(c)}">${esc(c||'Chưa ghi lớp')}</option>`).join('')}</select></label><label class="field">Ưu tiên hỗ trợ<input id="help-filter" type="checkbox"> Chỉ hiện học sinh có dấu hiệu cần hỗ trợ</label></div><div id="class-summary" class="stats"></div>`);
+  container.insertAdjacentHTML('afterend','<section class="panel"><h2>Tiến độ theo bài</h2><p>Bấm một ô để xem chặng, SQL và nhật kí của học sinh. Màu hỗ trợ chỉ là dấu hiệu từ lỗi/checkpoint tự học, giáo viên cần trao đổi để xác định nguyên nhân.</p><div class="heat-legend"><span class="heat done">Hoàn thành</span><span class="heat active">Đang học</span><span class="heat help">Cần hỗ trợ</span><span class="heat empty">Chưa học</span></div><div class="table-wrap" id="heatmap"></div></section><section class="panel"><h2>Khó khăn thường gặp trong nhóm đang lọc</h2><div id="common-errors"></div></section>');
+  function render(){const cls=root.querySelector('#class-filter').value,term=search.value.trim().toLowerCase(),helpOnly=root.querySelector('#help-filter').checked;
+   const students=data.students.filter(s=>(!cls||s.class_label===cls)&&[s.student_code,s.display_name,s.class_label,s.family].join(' ').toLowerCase().includes(term)&&(!helpOnly||progress(s).some(g=>cellState(g)==='help')));
+   const completed=students.reduce((a,s)=>a+Number(s.completed||0),0),needHelp=students.filter(s=>progress(s).some(g=>cellState(g)==='help')).length;
+   root.querySelector('#class-summary').innerHTML=`<div><b>${students.length}</b>học sinh đang lọc</div><div><b>${students.length?Math.round(completed/(students.length*14)*100):0}%</b>số bài hoàn thành</div><div><b>${needHelp}</b>cần xem xét hỗ trợ</div>`;
+   container.innerHTML=`<table><thead><tr><th>MSHS</th><th>Họ tên</th><th>Lớp</th><th>Family</th><th>Tự học</th><th>Chi tiết</th></tr></thead><tbody>${students.map(s=>`<tr><td>${esc(s.student_code)}</td><td>${esc(s.display_name)}</td><td>${esc(s.class_label)}</td><td>${esc(s.family)}</td><td>${s.completed}/14</td><td><button data-student-detail="${s.user_id}" data-key="buoi-01">Xem bài làm</button> <button data-action="reset-password" data-id="${s.user_id}">Hỗ trợ mật khẩu</button></td></tr>`).join('')}</tbody></table>${students.length?'':'<p>Chưa có học sinh phù hợp.</p>'}`;
+   root.querySelector('#heatmap').innerHTML=`<table class="heatmap"><thead><tr><th>Học sinh</th>${SQL_COURSE.lessons.map(l=>`<th scope="col" title="${esc(l.title)}">${l.n}</th>`).join('')}</tr></thead><tbody>${students.map(s=>`<tr><th scope="row">${esc(s.student_code)}<small>${esc(s.display_name)}</small></th>${SQL_COURSE.lessons.map(l=>{const g=progress(s).find(g=>g.key===l.key),status=cellState(g);return `<td><button class="heat ${status}" data-student-detail="${s.user_id}" data-key="${l.key}" aria-label="${esc(s.display_name)}, buổi ${l.n}: ${names[status]}">${status==='done'?'✓':status==='help'?'!':g?.passed?.length?g.passed.length+'/4':'·'}</button></td>`}).join('')}</tr>`).join('')}</tbody></table>`;
+   const counts={};for(const s of students)for(const g of progress(s))for(const [kind,count]of Object.entries(g.sqlErrors||{}))counts[kind]=(counts[kind]||0)+(Number(count)||0);
+   const errors=Object.entries(counts).filter(([_,count])=>count>0).sort((a,b)=>b[1]-a[1]);root.querySelector('#common-errors').innerHTML=errors.length?`<ul>${errors.map(([kind,count])=>`<li>${esc(SQLTools.labels[kind]||kind)}: <b>${count}</b> lần lỗi được ghi nhận</li>`).join('')}</ul>`:'<p>Chưa có lỗi SQL được ghi nhận. Không suy từ đây rằng tất cả học sinh đã hiểu bài.</p>';
+   root.querySelectorAll('[data-student-detail]').forEach(b=>b.onclick=()=>options.detail(b.dataset.studentDetail,b.dataset.key));
+  }
+  search.oninput=render;root.querySelector('#class-filter').onchange=render;root.querySelector('#help-filter').onchange=render;render();
+ }
+ return {mount};
+})();
