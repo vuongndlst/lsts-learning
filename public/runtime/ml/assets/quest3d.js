@@ -33,6 +33,7 @@ let TT = doc(LUU, {});
 const QS = Object.assign({ am: true, chat_luong: "tu_dong" }, doc(LUU_Q, {}));
 function luuQS() { luu(LUU_Q, QS); }
 function qua() { return TT.qua || 0; }
+function passed(i) { return Array.isArray(TT.passedStages) ? TT.passedStages.includes(i) : i < qua(); }
 
 // ------------------------------------------------------------------ DOM
 function h(tag, at, con) {
@@ -366,7 +367,7 @@ function nhanCong(tt) {
     g.textBaseline = "middle"; g.fillStyle = g.strokeStyle; g.font = "700 36px " + FONT;
     g.fillText(tt === "xong" ? "✓ ĐÃ NHẬN CHỨNG CHỈ" : tt === "mo" ? "CỔNG ĐÃ MỞ" : "CỔNG KHOÁ", 36, 58);
     g.fillStyle = "#F8FAFC"; g.font = "600 38px " + FONT;
-    g.fillText(tt === "khoa" ? "Qua đủ " + N + " trạm để mở" : B.cuoi.so_cau + " câu · đạt " + B.cuoi.dat + " nhận chứng chỉ", 36, 124);
+    g.fillText(tt === "khoa" && !window.PORTAL_SELF_STUDY ? "Qua đủ " + N + " trạm để mở" : B.cuoi.so_cau + " câu · đạt " + B.cuoi.dat + " nhận chứng chỉ", 36, 124);
   });
 }
 
@@ -394,7 +395,7 @@ const TUONG = (() => {
   bang.position.y = 2.0; g.add(bang);
   const chu = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 1.1), new THREE.MeshBasicMaterial({ transparent: true, toneMapped: false,
     map: veChu(600, 220, (c, w, hh) => { c.fillStyle = "#EAFBFF"; c.textAlign = "center"; c.textBaseline = "middle";
-      c.font = "700 56px " + FONT; c.fillText(CFG.ten_dao, w / 2, 80, w - 20); c.font = "600 35px " + FONT; c.fillText(B.nhan + " · MACHINE LEARNING", w / 2, 160, w - 20); }) }));
+      c.font = "700 56px " + FONT; c.fillText(CFG.ten_dao, w / 2, 80, w - 20); c.font = "600 35px " + FONT; c.fillText(B.nhan + " · LSTS LEARNING", w / 2, 160, w - 20); }) }));
   chu.position.set(0, 2.0, 0.09); g.add(chu);
   scene.add(g); vatCan(3.4, 19, 1.4);
 })();
@@ -578,9 +579,9 @@ function moMenu(hien) {
   if (!hien) return;
   menu.innerHTML = "";
   menu.appendChild(h("h4", { text: "Dịch chuyển tới" }));
-  TRAM.forEach(t => menu.appendChild(h("button", { text: "Trạm " + (t.i + 1) + " · " + (B.chang[t.i].ten_ngan || B.chang[t.i].ten) + (t.i < qua() ? " ✓" : ""),
+  TRAM.forEach(t => menu.appendChild(h("button", { text: "Trạm " + (t.i + 1) + " · " + (B.chang[t.i].ten_ngan || B.chang[t.i].ten) + (passed(t.i) ? " ✓" : ""),
     onclick: () => { moMenu(false); dichChuyen(t); }, ...(t.i > qua() && !window.PORTAL_SELF_STUDY ? { disabled: "" } : {}) })));
-  menu.appendChild(h("button", { text: "Cổng checkpoint cuối", onclick: () => { moMenu(false); dichChuyen(CONG); }, ...(qua() < N ? { disabled: "" } : {}) }));
+  menu.appendChild(h("button", { text: "Cổng checkpoint cuối", onclick: () => { moMenu(false); dichChuyen(CONG); }, ...(qua() < N && !window.PORTAL_SELF_STUDY ? { disabled: "" } : {}) }));
   menu.appendChild(h("h4", { text: "Hiển thị" }));
   [["tu_dong", "Tự động"], ["cao", "Đẹp (máy mạnh)"], ["nhe", "Nhẹ (máy yếu)"]].forEach(([k, t]) =>
     menu.appendChild(h("button", { class: QS.chat_luong === k ? "chon" : "", text: (QS.chat_luong === k ? "● " : "○ ") + t,
@@ -608,9 +609,9 @@ document.body.appendChild(manChuyen);
 function veKhoaHUD() {
   hangKhoa.innerHTML = "";
   for (let i = 0; i < N; i++) {
-    const cls = i < qua() ? "xong" : (i === qua() || window.PORTAL_SELF_STUDY) ? "mo" : "";
+    const cls = passed(i) ? "xong" : (i === qua() || window.PORTAL_SELF_STUDY) ? "mo" : "";
     hangKhoa.appendChild(h("span", { class: "q-khoa " + cls, title: "Chặng " + (i + 1) + (cls === "xong" ? " — đã qua" : cls === "mo" ? " — đang mở" : " — khoá"),
-      text: i < qua() ? "✓" : String(i + 1) }));
+      text: passed(i) ? "✓" : String(i + 1) }));
   }
   hangKhoa.appendChild(h("span", { class: "q-khoa cuoi " + (TT.dat ? "xong" : qua() >= N ? "mo" : ""), text: TT.dat ? "✓ Chứng chỉ" : "Checkpoint" }));
 }
@@ -618,7 +619,7 @@ function veKhoaHUD() {
 // ------------------------------------------------------------------ trạng thái trạm / cổng
 function capNhatTrangThai(vuaDoi) {
   TRAM.forEach(t => {
-    const tt = t.i < qua() ? "xong" : (t.i === qua() || window.PORTAL_SELF_STUDY) ? "mo" : "khoa";
+    const tt = passed(t.i) ? "xong" : (t.i === qua() || window.PORTAL_SELF_STUDY) ? "mo" : "khoa";
     if (tt === t.tt) return;
     t.tt = tt;
     const m = new THREE.Color(MAU_TT[tt]);
@@ -628,7 +629,7 @@ function capNhatTrangThai(vuaDoi) {
     t.nhan.material.map.dispose(); t.nhan.material.map = nhanTram(t.i, tt); t.nhan.material.needsUpdate = true;
     if (vuaDoi && tt === "xong") phaoHoa(t.p.clone().setY(4.2), "#22C55E");
   });
-  const ttc = TT.dat ? "xong" : qua() >= N ? "mo" : "khoa";
+  const ttc = TT.dat ? "xong" : qua() >= N || window.PORTAL_SELF_STUDY ? "mo" : "khoa";
   if (ttc !== CONG.tt) {
     const cu = CONG.tt; CONG.tt = ttc;
     if (CONG.nhan.material.map) CONG.nhan.material.map.dispose();
@@ -640,9 +641,9 @@ function capNhatTrangThai(vuaDoi) {
   veKhoaHUD();
 }
 function docLaiTienDo(tuKhung) {
-  const cu = { qua: qua(), dat: !!TT.dat };
+  const cu = { qua: qua(), dat: !!TT.dat, stages:JSON.stringify(TT.passedStages) };
   TT = doc(LUU, {});
-  const doi = qua() !== cu.qua || !!TT.dat !== cu.dat;
+  const doi = qua() !== cu.qua || !!TT.dat !== cu.dat || JSON.stringify(TT.passedStages)!==cu.stages;
   capNhatTrangThai(doi);
   if (doi) veGoiY(gan);
   if (!doi || !tuKhung) return;
@@ -650,7 +651,7 @@ function docLaiTienDo(tuKhung) {
   else if (qua() > cu.qua) {
     SFX.qua();
     thongBao(qua() >= N ? "Em đã qua cả " + N + " trạm — Cổng checkpoint cuối đã mở!" :
-      "Đã qua Chặng " + qua() + " — Trạm " + (qua() + 1) + " vừa mở khoá.", "tot", 4500);
+      "Đã qua Chặng " + qua() + ". Con có thể chọn trạm tiếp theo hoặc ôn lại.", "tot", 4500);
   }
 }
 
@@ -683,7 +684,7 @@ let khungMo = false, moLucQua = 0;
 function moKhung(src, tieu_de) {
   khungMo = true; khungTieuDe.textContent = tieu_de;
   moLucQua = qua();
-  const u=new URL(src,location.href),q=new URLSearchParams(location.search);u.searchParams.set('class',q.get('class'));u.searchParams.set('lesson',q.get('lesson'));if(q.get('guest')==='1')u.searchParams.set('guest','1');iframe.src=u.href; khung.classList.add("hien");
+  const u=new URL(src,location.href),q=new URLSearchParams(location.search);u.searchParams.set('class',q.get('class'));u.searchParams.set('lesson',q.get('lesson'));u.searchParams.set('personal',q.get('personal')||'0');u.searchParams.set('mode','read');if(q.get('guest')==='1')u.searchParams.set('guest','1');iframe.src=u.href; khung.classList.add("hien");
   SFX.mo(); nhacNho(true); if (AM.u) AM.u.gain.value = 0;
   PHIM.clear(); CAN.hoat = false;
   setTimeout(() => khungDong.focus(), 50);
@@ -732,7 +733,7 @@ window.addEventListener("storage", (e) => { if (e.key === LUU) docLaiTienDo(true
 
 function vaoTram(t) {
   if (t === CONG) {
-    if (qua() < N) { SFX.khoa(); thongBao("Cổng còn khoá — qua đủ " + N + " trạm trước nhé.", "xau"); return; }
+    if (qua() < N && !window.PORTAL_SELF_STUDY) { SFX.khoa(); thongBao("Cổng còn khoá — qua đủ " + N + " trạm trước nhé.", "xau"); return; }
     moKhung(CFG.trang_doc + "?nhung=1&cuoi=1", "Checkpoint cuối — " + B.cuoi.so_cau + " câu, đạt " + B.cuoi.dat + " nhận chứng chỉ");
     return;
   }
@@ -825,20 +826,20 @@ function veGoiY(t) {
   goiY.innerHTML = "";
   let nho, lon, mo, nut, vao_dc;
   if (t === CONG) {
-    vao_dc = qua() >= N;
+    vao_dc = qua() >= N || window.PORTAL_SELF_STUDY;
     nho = TT.dat ? "ĐÃ NHẬN CHỨNG CHỈ" : vao_dc ? "CỔNG ĐÃ MỞ" : "CỔNG KHOÁ";
     lon = "Checkpoint cuối";
     mo = vao_dc ? B.cuoi.so_cau + " câu, đạt " + B.cuoi.dat + " câu nhận chứng chỉ. Làm lại không giới hạn, mỗi lần là đề mới." :
-      "Qua đủ " + N + " trạm để mở cổng. Em đã qua " + qua() + "/" + N + ".";
+      window.PORTAL_SELF_STUDY?"Thử sức với checkpoint cuối bất kỳ lúc nào.":"Qua đủ " + N + " trạm để mở cổng. Em đã qua " + qua() + "/" + N + ".";
     nut = TT.dat ? "Xem chứng chỉ" : "Vào làm bài";
   } else {
     const c = B.chang[t.i];
     vao_dc = t.i <= qua() || window.PORTAL_SELF_STUDY;
-    nho = "CHẶNG " + (t.i + 1) + " / " + N + " · khoảng " + c.phut + " phút" + (t.i < qua() ? " · ✓ đã qua" : "");
+    nho = "CHẶNG " + (t.i + 1) + " / " + N + " · khoảng " + c.phut + " phút" + (passed(t.i) ? " · ✓ đã qua" : "");
     lon = c.ten;
     mo = vao_dc ? (c.khoi_dong ? "Robot hỏi: " + c.khoi_dong.replace(/<[^>]+>/g, "") : c.muc_tieu) :
       "Trạm còn khoá — qua Chặng " + (qua() + 1) + " trước nhé.";
-    nut = t.i < qua() ? "Ôn lại chặng" : "Vào trạm";
+    nut = passed(t.i) ? "Ôn lại chặng" : "Vào trạm";
   }
   goiY.append(h("div", { class: "q-nho", text: nho }), h("div", { class: "q-lon", text: lon }), h("p", { text: mo }));
   const b = h("button", { class: "q-vao", text: nut + " ▶", onclick: () => vaoTram(t) });
@@ -973,7 +974,7 @@ manDau.appendChild(h("div", { class: "q-the" }, [
   h("div", { class: "q-nho", text: B.khoa + " · " + B.nhan }),
   h("h1", { text: CFG.ten_dao }),
   h("p", { class: "q-cau", text: B.cau_hoi }),
-  h("p", { text: "Đi qua " + N + " trạm để khám phá bài học. Sau mỗi trạm, dừng lại trao đổi và ghi bài rồi mới đi tiếp." }),
+  h("p", { text: "Chọn bất kỳ trạm nào để khám phá. Khi học trên lớp, dừng và trao đổi theo lời nhắc của giáo viên." }),
   h("p", { class: "q-nho", text: CAM_UNG ? "Kéo để di chuyển hoặc chạm trạm để đi tới." : "Di chuyển: WASD/phím mũi tên · Vào trạm: E · Xoay nhìn: kéo chuột." }),
   h("div", { class: "q-hang" }, [nutVao, h("a", { class: "q-lien-ket", href: CFG.trang_doc, text: "Học ở chế độ đọc" })]),
 ]));

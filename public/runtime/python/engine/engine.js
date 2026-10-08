@@ -13,7 +13,7 @@ const CFG = { schoolName: "", teacherName: "", canvasSubmissionUrl: "", ...(wind
 const PREFIX = "py10";
 const CLASSES = ["10A1", "10A2", "10A3", "10A4", "10A5", "10A6", "10A7", "10A8", "10A9", "10A10"];
 const XP_PASS = 10, XP_FIRST_TRY = 5, STAR_LOSS = 10, RUN_LIMIT_MS = 3000;
-const STEPS = L.steps;
+const STEPS = L.steps.filter(step=>step.kind!=='gate'||!selfStudy());
 // Chặng "Luyện thêm" (kind: "extra", sau Boss): không bắt buộc, không ảnh hưởng chứng chỉ.
 STEPS.filter(s => s.kind === "extra").forEach(s => s.challenges.forEach(c => { c.extra = true; }));
 const REQUIRED = STEPS.filter(s => s.kind !== "extra").flatMap(s => (s.challenges || []).filter(c => !c.advanced && !c.bonus).map(c => c.id));
@@ -50,7 +50,7 @@ function save() {
   PyCloud.save(L.id, state);
 }
 function load(student) {
-  const remote=PyCloud.state(L.id);
+  const remote={...PyCloud.state(L.id)};const q=new URLSearchParams(location.search),steps=L.steps.filter(s=>s.kind!=='gate'&&(q.has('cuoi')||s.kind!=='boss')),index=q.has('cuoi')?steps.findIndex(s=>s.kind==='boss'):Number(q.get('chang'));if(q.has('chang')||q.has('cuoi'))remote.active=steps[index]?.id||steps[0].id;
   state = { ...freshState(student), ...remote, student };
   for(const field of ["passed","attempts","drafts","inputs","gates","stars"]) if(!state[field]||typeof state[field]!=="object"||Array.isArray(state[field]))state[field]={};
 }
@@ -327,7 +327,7 @@ function renderRail() {
   rail.innerHTML = `
     <div class="rail-head"><div class="eyebrow">BÀI ${L.number}</div><div class="rail-title">${esc(L.title)}</div>
       <div class="rail-story">${esc(L.story)}</div>
-      <div class="prog"><div class="prog-bar" style="width:${pct}%"></div></div><div class="prog-text">${pct}% nhiệm vụ đạt</div><button id="studyMode" class="btn">${selfStudy()?"Học theo lớp":"Tự học / học bù"}</button><p class="muted">Học bù mở điều hướng, không tự ghi đạt nhiệm vụ. Mã đồng bộ phục vụ nhịp lớp; hoàn thành cần đạt các nhiệm vụ bắt buộc và Boss.</p></div>
+      <div class="prog"><div class="prog-bar" style="width:${pct}%"></div></div><div class="prog-text">${pct}% nhiệm vụ đạt</div><button id="studyMode" class="btn">${selfStudy()?"Học theo lớp":"Tự học / học bù"}</button><p class="muted">Con có thể chọn mọi chặng. Hoàn thành cần đạt các nhiệm vụ bắt buộc và Boss.</p></div>
     <ol class="steps">${STEPS.map((s, i) => {
       const un = stepUnlocked(i), done = stepDone(s), act = state.active === s.id;
       const ex = s.kind === "extra";

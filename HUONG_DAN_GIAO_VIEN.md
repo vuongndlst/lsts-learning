@@ -1,42 +1,57 @@
-# Sử dụng cổng học chung
+# Sử dụng LSTS Learning
 
-Cổng: https://vuongndlst.github.io/lsts-learning/ . Bốn website cũ tiếp tục hoạt động. Cổng mới dành cho thí điểm song song, chưa tự chuyển học sinh, lịch hoặc tiến độ cũ.
+Cổng: https://vuongndlst.github.io/lsts-learning/ . Bốn web cũ vẫn hoạt động, chưa tự chuyển tiến độ lớp đang học.
 
-## Khách và tài khoản
+## Mời học sinh bằng link
 
-Chọn **Khám phá khóa học** để tự học không cần đăng nhập. Tiến độ khách lưu bằng localStorage trên trình duyệt đang dùng, có thể tải bản sao. Chế độ khách mở điều hướng học bù nhưng vẫn yêu cầu làm checkpoint để hoàn thành. Dữ liệu khách không tự nhập vào tài khoản hoặc kết quả lớp.
+1. Đăng nhập email trường. Giáo viên dùng mật khẩu tạm cần đổi trước khi vào dashboard.
+2. Chọn lớp được phân công hoặc Tạo lớp: tự đặt tên, chọn khóa/năm/phiên bản. Có sẵn 16 lớp: Vương 9, Hân 5, Thịnh 2. ML L1/L2/L3/L4 là bốn lớp cùng Level 1.
+3. Chọn **Cài đặt** hoặc **Mời học sinh bằng link**. Nếu còn Chuẩn bị, bấm **Mở nhận học sinh**.
+4. Bấm **Sao chép link tham gia**, gửi link cho lớp trên kênh thầy/cô đang dùng. Học sinh bấm link, xem tên lớp, đăng nhập hoặc đăng ký rồi bấm **Tham gia lớp này**; không cần nhập mã.
+5. Link dùng lại được khi tải lại trang. Đổi link vô hiệu link cũ; Đóng nhận học sinh ngừng nhận người mới. Thành viên/bài làm đang có được giữ lại.
 
-Đăng nhập để tham gia lớp bằng mã và lưu vào tài khoản. Mã học sinh gồm đúng 7 chữ số, giữ số 0 đầu. Email tự tạo theo mã học sinh. Không xác nhận email. Thông tin họ tên, lớp học thuật, family sửa trong hồ sơ. Đăng nhập được giữ qua các lần mở trình duyệt.
+Mã lớp ở **Mã lớp · phương án dự phòng**. Tạo mã mới thay mã cũ nhưng giữ link. Lớp web độc lập với lớp học thuật; học sinh từ nhiều lớp học thuật có thể vào chung một lớp web.
 
-## Mở lớp đầu tiên
+## Chia sẻ bài và dạy trên lớp
 
-1. Đăng nhập bằng email trường. Giáo viên dùng mật khẩu tạm phải đổi mật khẩu trước khi vào dashboard.
-2. Kiểm tra lớp được phân công. Có sẵn 16 lớp ở trạng thái **Chuẩn bị**: Vương 9, cô Hân 5, thầy Thịnh 2. Bốn lớp ML đều học Level 1.
-3. Trong **Cài đặt**, mở nhận học sinh và sao chép mã lớp. Mã chỉ hiện khi tạo hoặc đổi; cần lưu riêng trước khi đóng hộp thoại.
-4. Trong **Lịch học**, chọn lên lịch và giao bài, chọn bài, ngày giờ, thời lượng, phòng. Chọn cả lớp hoặc một nhóm, một buổi hoặc nhiều tuần, bỏ ngày nghỉ. Xem trước rồi xác nhận.
-5. Học sinh đăng nhập, nhập mã lớp. Lớp học trên web độc lập với lớp học thuật trong hồ sơ.
-6. Bài mở từ giờ đã chọn. Trong buổi học giữ checkpoint theo chặng; sau buổi học mở điều hướng tự học để học sinh vắng có thể học bù. Mở điều hướng không đánh dấu hoàn thành.
+Tab Bài học → **Sao chép link bài** mở thẳng bài trong lớp. Học sinh cần tham gia lớp bằng link mời trước. Đăng nhập một lần, phiên được giữ khi mở bài khác.
 
-Giáo viên tạo thêm lớp bằng tên tự đặt, chọn khóa, năm học và phiên bản. Admin thêm giáo viên vào khóa; giáo viên hỗ trợ cấp mật khẩu tạm cho học sinh thuộc lớp mình. Tiến độ tự học dùng để đối chiếu bài làm, chưa phải điểm chính thức.
+Để gửi bài tự học cho cả khách: Khám phá → khóa → bài → Công cụ → Sao chép link bài. Ví dụ ML bài 7: https://vuongndlst.github.io/lsts-learning/#/explore/ml-level1/bai07 . Link theo mã bài mở bản công bố mới nhất. Khách chọn đăng nhập từ bài sẽ quay lại đúng bài sau đăng nhập.
+
+Không cần giao bài, chọn ngày mở bài hoặc phát mã mở chặng. Tất cả bài/chặng/checkpoint cuối mở. Giáo viên nói thời gian làm và yêu cầu dừng để trao đổi. Học sinh vắng tự học bù qua link. Hoàn thành vẫn cần checkpoint và nhiệm vụ bắt buộc.
+
+Mặc định đảo 3D cả bốn khóa. Bài học chuyển sang bài đọc/thực hành; Mục lục thu điều hướng. Công cụ có lưu ngay, tải bản sao, sao chép link và toàn màn hình. Máy không tải được 3D sẽ chuyển sang bài đọc.
+
+Lịch dạy ở Cài đặt là tùy chọn để nhắc ngày/giờ/phòng/nhóm, không khóa nội dung. Có xem trước trước khi lưu.
+
+## Tiến độ và chứng chỉ
+
+Khách nhập họ tên lần đầu, sửa ở Công cụ. Tiến độ/bài làm/lịch sử SQL lưu trên trình duyệt; xóa bộ nhớ sẽ mất dữ liệu này. Tải bản sao trước khi đổi máy. Hoàn thành bài có chứng chỉ bài. Dữ liệu khách không tự nhập vào tài khoản hoặc kết quả lớp.
+
+Học sinh đăng ký MSHS đúng 7 số, giữ số 0 đầu; email MSHS@lsts.edu.vn. Mật khẩu từ 8 ký tự, không xác nhận email. Hồ sơ sửa được, phiên đăng nhập được giữ. Tự học qua link trực tiếp cũng xuất hiện cho giáo viên lớp cùng khóa.
+
+Trang khóa trong Khám phá hiển thị XP/số bài hoàn thành. Hoàn thành toàn bộ lộ trình có **Tải chứng chỉ toàn khóa**. Một mã chứng chỉ theo học sinh/khóa; XP cùng bài không cộng lặp giữa các lớp hoặc lần làm lại. Đây là ghi nhận tự học, không thay điểm chính thức.
+
+Tab Học sinh có cấp mật khẩu tạm sau xác minh và tạm dừng/khôi phục quyền vào lớp. Mật khẩu tạm buộc đổi ở lần đăng nhập sau. Admin quản lý giáo viên/phân công khóa và lớp.
 
 ## Cập nhật học liệu
 
-Giữ nguyên nguồn chính thức ở từng thư mục khóa. Sửa nội dung, hình và video trong script sinh bài; không sửa tay JSON đã sinh hoặc nội dung block đang dùng. Slide giảng dạy và nguồn web là hai tài liệu riêng: sửa PPTX không tự sửa bài web.
+Sửa nội dung/hình/video trong nguồn chính thức của khóa. Slide giảng và nguồn web riêng: sửa PPTX không tự sửa bài web. Không sửa tay block đã công bố hoặc ghi đè phiên bản có tiến độ.
 
-Pipeline nội bộ tại thư mục `LSTS_Learning`: chạy `scripts/build_content.cjs` để đóng gói bốn khóa, rồi `scripts/ml_activities.py` để bổ sung đầy đủ thực hành và notebook ML bản học sinh. Kiểm tra bản đóng gói trong `_Private/content-bundle.json`, thử chức năng và kiểm tra nguồn video trước khi phát hành.
+Trong thư mục nội bộ LSTS_Learning: scripts/build_content.cjs đóng gói bốn khóa; scripts/ml_activities.py bổ sung thực hành/notebook ML bản học sinh. Kiểm tra _Private/content-bundle.json, nguồn video và thực hành trước khi phát hành.
 
-Phát hành riêng khóa đã sửa bằng `scripts/provision_portal.py content <số phiên bản mới> <course_id>`. Số mới phải lớn hơn phiên bản hiện tại của khóa: bản đầu SQL/Python/C++ là 1, ML đầy đủ thực hành là 3. Không dùng lại số phiên bản đã phát hành.
+Phát hành riêng khóa bằng scripts/provision_portal.py content <phiên bản mới> <course_id>. Số mới lớn hơn bản hiện tại: SQL/Python/C++ ban đầu 1, ML đầy đủ thực hành/notebook 3. Chọn phiên bản trong Cài đặt lớp để cập nhật danh sách bài. Bài làm cũ giữ theo bản cũ; khách xem bản mới nhất và tiến độ khách tách theo phiên bản. Đổi nội dung không cần phát hành lại giao diện.
 
-Trong lớp, chọn phiên bản mới tại **Cài đặt** để dùng cho bài giao tiếp theo. Bài đã giao giữ nội dung và tiến độ cũ. Khách sẽ đọc phiên bản mới nhất, tiến độ khách tách theo phiên bản. Cập nhật nội dung không cần phát hành lại giao diện; thay đổi runtime/giao diện mới cần build và đẩy repository cổng.
+Không chạy lại build_runtime.py/ml_quest.py chỉ để đổi nội dung: chúng đưa engine gốc vào cổng ở đợt khởi tạo. Khi thay engine, giữ adapter/chế độ học mở/certificate hiện hành, build và thử lại bốn engine. Quy trình bảo trì runtime xem RUNTIME_MAINTENANCE.md trong thư mục nội bộ.
 
-Đợt này không sửa nguồn hoặc URL các website đang dạy. Trước khi chuyển một lớp đang học, đối chiếu roster và tiến độ tại web cũ, chọn buổi thí điểm và giữ lối quay lại web cũ. Không gộp dữ liệu localStorage cũ vào tiến độ lớp mới khi chưa có ánh xạ danh tính học sinh.
+## Lớp đang học và năm sau
 
-## Năm học sau
+Trước khi chuyển lớp từ web cũ, đối chiếu danh sách/tiến độ và thí điểm một buổi. Không tự gán localStorage cũ cho tài khoản khi chưa xác minh danh tính. Giữ URL cũ cho tiết đang diễn ra.
 
-Tạo lớp mới, chọn năm học mới và học liệu phù hợp. Lưu trữ lớp cũ để xem lại tiến độ. Học sinh giữ cùng tài khoản và có thể tham gia nhiều khóa qua các năm.
+Tạo lớp mới cho năm mới, chọn học liệu phù hợp. Lưu trữ lớp cũ giữ bài làm/xem lại. Học sinh giữ tài khoản và có thể tham gia nhiều khóa qua nhiều năm.
 
 ## Cấu hình riêng
 
-Token quản trị nằm trong `.env` của Grade 11 - MOET, khóa `db-token`. Không đưa `.env`, `_Private`, thông tin mật khẩu hoặc backup vào GitHub. Mật khẩu tạm giáo viên nằm trong `_Private/giao-vien-2026-2027.md` và cung cấp riêng cho đúng người. Không đổi mật khẩu admin khi cập nhật nguồn hoặc phát hành lại.
+Token ở .env của Grade 11 - MOET, khóa db-token. Không đưa giá trị token, _Private, mật khẩu hoặc backup lên GitHub. Mật khẩu tạm giáo viên ở _Private/giao-vien-2026-2027.md, chỉ cung cấp riêng. Không đổi mật khẩu admin khi refactor.
 
-Migration trong thư mục Supabase đã được áp dụng bằng Management API. Cần đối chiếu nhật ký trước khi chạy CLI `db push`. Edge Function cổng sử dụng `verify_jwt:true`; không tắt xác thực để xử lý lỗi giao diện.
+Migration đã áp dụng qua Management API; đối chiếu nhật ký trước db push. Function cổng giữ verify_jwt:true.

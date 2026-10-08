@@ -7,7 +7,7 @@ async function rest(path:string,method='GET',body?:unknown,token=secret){
  if(!response.ok){const code=v?.code||v?.error_code;throw new Failure(code==='email_exists'||code==='email_address_not_authorized'?'account_exists':response.status===401?'authentication_required':'operation_failed',response.status===401?401:400)}return v;
 }
 function password(){const chars='abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#';const values=crypto.getRandomValues(new Uint32Array(18));return 'Aa7!'+Array.from(values.slice(4),v=>chars[v%chars.length]).join('')}
-async function findUser(email:string){for(let page=1;page<=100;page++){const v=await rest('/auth/v1/admin/users?per_page=100&page='+page);const u=v.users.find((x:any)=>x.email?.toLowerCase()===email);if(u)return u;if(v.users.length<100)return null}throw new Failure('directory_limit')}
+async function findUser(email:string){for(let page=1;page<=100;page++){const v=await rest('/auth/v1/admin/users?per_page=100&page='+page);const u=v.users.find((x:any)=>x.email?.toLowerCase()===email);if(u)return u;if(v.users.length<80)return null}throw new Failure('directory_limit')}
 Deno.serve(async(req)=>{
  const origin=req.headers.get('Origin')||'',allowed=['https://vuongndlst.github.io','http://localhost:8765','http://127.0.0.1:8765'];
  const headers={'Content-Type':'application/json','Access-Control-Allow-Origin':allowed.includes(origin)?origin:'https://vuongndlst.github.io','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS','Vary':'Origin'};
@@ -20,7 +20,7 @@ Deno.serve(async(req)=>{
  const actor=await rest('/auth/v1/user','GET',undefined,token);
  const boot=await rest('/rest/v1/rpc/learning_portal_call','POST',{p_action:'bootstrap',p_data:{}},token);
  if(b.action==='change_password'){
- if(typeof b.password!=='string'||b.password.length<10||b.password.length>128||typeof b.currentPassword!=='string'||b.password===b.currentPassword)throw new Failure('invalid_password');
+ if(typeof b.password!=='string'||b.password.length<8||b.password.length>128||typeof b.currentPassword!=='string'||b.password===b.currentPassword)throw new Failure('invalid_password');
  let proof;try{proof=await rest('/auth/v1/token?grant_type=password','POST',{email:actor.email,password:b.currentPassword})}catch{throw new Failure('current_password_incorrect')}
  if(proof.user.id!==actor.id)throw new Failure('authentication_required',401);
  await rest('/auth/v1/user','PUT',{password:b.password},proof.access_token);

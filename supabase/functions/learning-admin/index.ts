@@ -17,7 +17,7 @@ Deno.serve(async(req)=>{
  const b=await req.json();if(!/^[0-9a-f-]{36}$/.test(b.runId||''))return reply({error:'invalid_run'},400);
  if(b.action==='register_student'){
   const sid=String(b.studentCode||'').trim(),name=String(b.name||'').trim(),cls=String(b.classLabel||'').trim(),family=String(b.family||'').trim();
-  if(!/^\d{7}$/.test(sid)||!name||name.length>100||!cls||cls.length>30||family.length>60||typeof b.password!=='string'||b.password.length<10||b.password.length>128)return reply({error:'invalid_student_information'},400);
+  if(!/^\d{7}$/.test(sid)||!name||name.length>100||!cls||cls.length>30||family.length>60||typeof b.password!=='string'||b.password.length<8||b.password.length>128)return reply({error:'invalid_student_information'},400);
   const run=await rest('/rest/v1/learning_course_runs?run_id=eq.'+b.runId+(b.portalRegistration===true?'':'&registration_open=eq.true'));
   if(!run.length)return reply({error:'registration_closed'},400);
   const ip=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||req.headers.get('cf-connecting-ip')||'unknown';
@@ -43,10 +43,10 @@ Deno.serve(async(req)=>{
   let found=null;
   for(let page=1;page<=100;page++){
    const result=await rest('/auth/v1/admin/users?per_page=100&page='+page);
-   found=result.users.find((u:any)=>u.email?.toLowerCase()===email);if(found||result.users.length<100)break;
+   found=result.users.find((u:any)=>u.email?.toLowerCase()===email);if(found||result.users.length<80)break;
   }
   if(!found){
-   if(typeof b.password!=='string'||b.password.length<10||b.password.length>128)return reply({error:'password_min_10'},400);
+   if(typeof b.password!=='string'||b.password.length<8||b.password.length>128)return reply({error:'password_min_8'},400);
    found=await rest('/auth/v1/admin/users','POST',{email,password:b.password,email_confirm:true,app_metadata:{school_provisioned:true},user_metadata:{display_name:name}});
    await rest('/rest/v1/learning_profiles?user_id=eq.'+found.id,'PATCH',{display_name:name});
   }
@@ -55,7 +55,7 @@ Deno.serve(async(req)=>{
   return reply({ok:true,email});
  }
  if(b.action==='reset_password'){
-  if(typeof b.password!=='string'||b.password.length<10||b.password.length>128)return reply({error:'password_min_10'},400);
+  if(typeof b.password!=='string'||b.password.length<8||b.password.length>128)return reply({error:'password_min_8'},400);
   if(!/^[0-9a-f-]{36}$/.test(b.userId||''))return reply({error:'invalid_user'},400);
   const dashboard=await rest('/rest/v1/rpc/learning_dashboard','POST',{p_run:b.runId},token);
   const student=dashboard.students.some((s:any)=>s.user_id===b.userId);

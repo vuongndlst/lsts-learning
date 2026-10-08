@@ -1,33 +1,30 @@
 # LSTS Learning
 
-Cổng quản lý lớp và học tập chung cho C++ 8, Python 10, SQL 11 và Machine Learning Level 1 tại Đinh Thiện Lý.
+Cổng chung cho C++ 8, Python 10, SQL 11 và Machine Learning Level 1 tại Đinh Thiện Lý: https://vuongndlst.github.io/lsts-learning/ .
 
-## Chức năng
+## Học và tham gia lớp
 
-- Khám phá bốn khóa không cần đăng nhập. Chế độ khách lưu tiến độ, bài làm và lịch sử SQL trên cùng trình duyệt, tách riêng dữ liệu lớp. Xóa dữ liệu trình duyệt sẽ xóa tiến độ khách.
-- Tài khoản học sinh bằng MSHS 7 chữ số, giữ số 0 đầu; email trường tự tạo; không cần xác nhận email. Hồ sơ sửa được và dùng chung các khóa.
-- Dashboard giáo viên/admin; tạo lớp tự đặt tên, chọn khóa, năm học và phiên bản học liệu.
-- Mã tham gia lớp 8 ký tự; mở/đóng nhận học sinh, đổi mã, tạm dừng/khôi phục thành viên, lưu trữ lớp.
-- Lịch học và giao bài có bước xem trước; một buổi hoặc nhiều tuần, bỏ ngày nghỉ; giao cả lớp hoặc nhóm học sinh; lưu nháp/công bố và đổi lịch.
-- Bài mở theo giờ Việt Nam. Sau buổi học, mở điều hướng học bù; checkpoint và nhiệm vụ vẫn được ghi riêng.
-- Đăng nhập để tham gia lớp và lưu tiến độ Supabase theo tài khoản/lớp/bài/phiên bản. Có nháp khi mất mạng và đối chiếu xung đột. Chế độ khách không gửi bài làm lên Supabase.
-- Admin cấp quyền khóa/thêm giáo viên; giáo viên hỗ trợ mật khẩu học sinh trong lớp mình. Mật khẩu tạm phải đổi trước khi học/dạy.
-- Các engine được cô lập trong iframe, giữ tương tác, hình, sơ đồ, video và bộ chạy thực hành. ML có bài đọc, thế giới 3D và notebook bản học sinh.
+- Link tham gia là cách chính: giáo viên mở lớp → Cài đặt → Sao chép link tham gia. Học sinh bấm link, đăng nhập/đăng ký rồi xác nhận vào đúng lớp. Link được giữ qua bước đăng nhập. Đổi link/đóng nhận học sinh giữ thành viên và bài làm. Mã lớp là phương án dự phòng.
+- Mọi bài, chặng và checkpoint cuối đều mở, học bất kỳ lúc nào và theo thứ tự phù hợp. Không cần giao bài, lịch hoặc mã mở chặng. Giáo viên điều phối bằng lời nói. Mở điều hướng không tự ghi hoàn thành; các checkpoint/nhiệm vụ bắt buộc vẫn được kiểm tra.
+- Mặc định vào đảo 3D cho bốn khóa. Thanh công cụ gọn, chuyển bài đọc/đảo, thu mục lục, toàn màn hình, sao chép link bài.
+- Khách nhập họ tên trước khi vào bài; tiến độ/bài làm lưu trên trình duyệt. Có tải bản sao và chứng chỉ bài khi hoàn thành. Xóa bộ nhớ trình duyệt sẽ xóa tiến độ khách.
+- Đăng nhập để lưu tiến độ/XP và nhận một chứng chỉ toàn khóa sau khi hoàn thành mọi bài. Tự học qua link trực tiếp hiện trong tiến độ của học sinh thuộc lớp cùng khóa. Chứng chỉ ghi nhận tự học, không thay điểm giáo viên xác nhận.
+- MSHS đúng 7 chữ số, giữ số 0 đầu; email tự tạo MSHS@lsts.edu.vn. Hồ sơ sửa được. Mật khẩu ít nhất 8 ký tự, không xác nhận email. Phiên đăng nhập được giữ khi mở lại trình duyệt.
 
-## Phát triển và phát hành giao diện
+## Giáo viên và năm học
 
-Node.js 24. Cài thư viện bằng `npm ci`, chạy `npm run dev`, kiểm tra/build bằng `npm run build`. GitHub Actions phát hành `dist` lên GitHub Pages.
+Dashboard chung, tạo lớp tự đặt tên/chọn khóa/năm/phiên bản, quản lý thành viên và tiến độ. Lớp web độc lập với lớp học thuật. Admin phân công giáo viên theo khóa/lớp; giáo viên cấp mật khẩu tạm cho học sinh thuộc lớp mình. Mật khẩu tạm buộc đổi trước khi sử dụng tài khoản. Lịch dạy tùy chọn để nhắc buổi, không khóa nội dung. Lưu trữ lớp cuối năm giữ bài làm; năm sau tạo lớp mới.
 
-`src/config.json` chỉ chứa URL và khóa công khai của Supabase. Quyền được kiểm tra ở máy chủ; không đặt khóa quản trị, mật khẩu hoặc token trong repository.
+## Phát triển và học liệu
 
-## Học liệu và dữ liệu
+Node.js 24: npm ci, npm run dev, npm run build. GitHub Actions phát hành dist lên GitHub Pages. src/config.json chỉ có cấu hình công khai. Không đưa .env, khóa quản trị, mật khẩu, backup hoặc bài giải riêng vào repository.
 
-Học liệu bài, hàm chấm theo bài và notebook học sinh nằm trong các block ở Supabase. API khách chỉ đọc học liệu đã công bố ở phiên bản mới nhất. Dữ liệu lớp, hồ sơ và tiến độ tài khoản vẫn được bảo vệ theo quyền. Repository này chứa giao diện và runtime chung. Nguồn bài chính thức được giáo viên quản lý qua pipeline riêng; không sửa trực tiếp các tệp runtime để đổi nội dung bài.
+Học liệu và notebook học sinh đóng gói riêng trong Supabase. Khách đọc bản công bố mới nhất; lớp giữ phiên bản giáo viên chọn. Cập nhật bằng phiên bản mới, không ghi đè bản đang có tiến độ. Chọn bản mới cho lớp cập nhật danh sách bài; bài làm cũ giữ lesson ID/phiên bản cũ. Bản nháp bài đang mở vẫn lưu được khi phát hành bản mới. Link tự học theo mã bài ổn định mở bản mới nhất.
 
-Phát hành học liệu thành phiên bản mới, sau đó chọn phiên bản cho lớp. Các bài đã giao giữ nguyên lesson ID và tiến độ. Mở năm mới bằng lớp mới, không tái sử dụng enrollment của năm trước.
+Dữ liệu khách không tự gộp vào tài khoản. Tiến độ tài khoản tách theo lần học/lớp/phiên bản; XP khóa lấy giá trị cao nhất của mỗi mã bài để tránh cộng lặp. Chứng chỉ toàn khóa có mã duy nhất theo học sinh/khóa.
 
-Các migration trong `supabase/migrations` là nhật ký thay đổi đã kiểm thử. Dự án ban đầu được nâng cấp qua Management API; cần đối chiếu migration với trạng thái máy chủ trước khi sử dụng CLI `db push`, tránh chạy lại migration đã có. Các thao tác Auth có đặc quyền nằm trong Edge Functions, không nằm trong trình duyệt.
+Migration đã áp dụng qua Management API; đối chiếu nhật ký trước db push. Quyền được kiểm tra ở máy chủ; Function cổng giữ verify_jwt:true. Xem [hướng dẫn giáo viên](HUONG_DAN_GIAO_VIEN.md).
 
 ## Triển khai song song
 
-Cổng mới chạy song song với các website cũ. Những lớp đang học chưa được tự chuyển roster, tiến độ hoặc lịch. Giáo viên cần đối chiếu lớp và chọn buổi thử trước khi mời học sinh chuyển sang cổng chung. Không đổi đường dẫn của website cũ trong đợt phát hành này.
+Cổng chạy song song với bốn website cũ. Các lớp C++ bài 1 và ML bài 5–6 chưa được tự chuyển danh sách/tiến độ. Đối chiếu và thí điểm một buổi trước khi chuyển; giữ đường dẫn và nguồn website cũ.

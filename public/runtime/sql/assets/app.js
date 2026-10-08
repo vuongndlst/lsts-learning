@@ -8,7 +8,7 @@ const allowed=()=>Boolean(cloud.user&&cloud.ready&&cloud.contentLoaded);
 const state=()=>current&&allowed()?cloud.state(current.key):{};
 const selfStudy=()=>Boolean(window.PORTAL_SELF_STUDY);
 const saved=key=>allowed()?cloud.state(key):{};
-function save(s,key=current?.key){if(!key||!allowed())return;if(!cloud.save(key,s))toast('Đợi tài khoản tải xong trước khi lưu.');updateNav()}
+function save(s,key=current?.key){if(!key||!allowed())return;s.completed=Boolean(s.completed||s.best>=5&&[0,1,2,3].every(i=>s.passed?.includes(i))&&s.taskDone);if(!cloud.save(key,s))toast('Đợi tài khoản tải xong trước khi lưu.');updateNav()}
 function commitDraft(){clearTimeout(draftTimer);if(!pendingDraft)return;const d=pendingDraft;pendingDraft=null;const s=structuredClone(saved(d.key));s.draft=d.code;save(s,d.key)}
 function toast(t){$('#toast').textContent=t;$('#toast').style.display='block';clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>$('#toast').style.display='none',4500)}
 function openModal(html){$('#modal-body').innerHTML=html;if(!modal.open)modal.showModal()}
@@ -107,7 +107,7 @@ function download(name,text,type='text/plain;charset=utf-8'){const u=URL.createO
 function drawQuiz(){const types=['mc','mc','ma','sx','dd','ds'],used=new Set();quiz=types.map(type=>{const candidates=current.quiz.map((q,i)=>({q,i})).filter(x=>x.q.type===type&&!used.has(x.i));const x=shuffle(candidates)[0];used.add(x.i);return{...x.q,order:shuffle(x.q.options.map((_,i)=>i))}})}
 function renderFinal(){
  const p=state(),eligible=[0,1,2,3].every(i=>p.passed?.includes(i))&&p.taskDone;
- $('#lesson-body').innerHTML=`<article class="panel"><div class="eyebrow">Áp dụng và tự kiểm tra</div><h2>Thử thách cuối</h2><p>Mỗi đề có 6 câu từ ngân hàng. Đạt ít nhất 5/6, qua 4 chặng và nhiệm vụ SQL để hoàn thành phần tự học của buổi.</p><div class="notice">${eligible?'Con đã sẵn sàng làm thử thách.':'Con cần qua đủ 4 chặng và kiểm tra nhiệm vụ SQL trước.'}</div><button class="primary" data-action="new-quiz" ${eligible?'':'disabled'}>Rút đề mới</button><div id="quiz"></div>${p.completed?`<div class="notice">✓ Đã hoàn thành phần tự học. Điểm cao nhất: ${p.best||0}/6.<br><button data-action="report">Tải phiếu học tập</button></div>`:''}<p class="tiny">Điểm tự học được chấm trong trình duyệt, chưa phải điểm chính thức do giáo viên xác nhận.</p></article>`;
+ $('#lesson-body').innerHTML=`<article class="panel"><div class="eyebrow">Áp dụng và tự kiểm tra</div><h2>Thử thách cuối</h2><p>Mỗi đề có 6 câu từ ngân hàng. Đạt ít nhất 5/6, qua 4 chặng và nhiệm vụ SQL để hoàn thành phần tự học của buổi.</p><div class="notice">${eligible?'Con đã sẵn sàng làm thử thách.':'Con có thể thử đề ngay. Hoàn thành 4 chặng, nhiệm vụ SQL và đạt 5/6 để nhận chứng chỉ.'}</div><button class="primary" data-action="new-quiz" ${eligible||selfStudy()?'':'disabled'}>Rút đề mới</button><div id="quiz"></div>${p.completed?`<div class="notice">✓ Đã hoàn thành phần tự học. Điểm cao nhất: ${p.best||0}/6.<br><button data-action="report">Tải phiếu học tập</button></div>`:''}<p class="tiny">Điểm tự học được chấm trong trình duyệt, chưa phải điểm chính thức do giáo viên xác nhận.</p></article>`;
  if(quiz)renderQuiz();
 }
 function renderQuiz(){
@@ -115,7 +115,7 @@ function renderQuiz(){
  $('#quiz-form').onsubmit=e=>{
   e.preventDefault();let score=0;const fd=new FormData(e.target),answers=[];
   quiz.forEach((q,i)=>{let answer;if(q.type==='ma')answer=fd.getAll('q'+i).map(Number).sort((a,b)=>a-b);else if(q.type==='sx')answer=[...document.querySelectorAll(`[data-order="${i}"] .order-row`)].map(r=>Number(r.dataset.value));else answer=Number(fd.get('q'+i));answers.push(answer);const ok=JSON.stringify(answer)===JSON.stringify(q.answer);if(ok)score++;$('#q-feedback-'+i).textContent=(ok?'✓ Đúng. ':'Xem lại: ')+q.why;$('#q-feedback-'+i).className='feedback '+(ok?'good':'bad')});
-  const p=structuredClone(state());p.best=Math.max(p.best||0,score);p.attempts=[...(p.attempts||[]),{at:new Date().toISOString(),score}].slice(-20);p.completed=Boolean(p.completed||score>=5);save(p);
+  const p=structuredClone(state());p.best=Math.max(p.best||0,score);p.attempts=[...(p.attempts||[]),{at:new Date().toISOString(),score}].slice(-20);p.completed=Boolean(p.completed||score>=5&&[0,1,2,3].every(i=>p.passed?.includes(i))&&p.taskDone);save(p);
   $('#quiz-feedback').textContent=`${score}/6 · ${score>=5?'Đạt phần tự học.':'Học lại phần chưa chắc và rút đề mới để thử tiếp.'}`;
   if(score>=5)$('#quiz-feedback').insertAdjacentHTML('beforeend','<br><button type="button" data-action="report">Tải phiếu học tập</button>');
  };
@@ -130,7 +130,7 @@ function auth(mode='login'){
  const ident=fd.get('identity').trim().toLowerCase(),password=fd.get('password');
  if(register){if(password!==fd.get('confirm'))throw Error('Hai mật khẩu chưa giống nhau.');await cloud.signUp(ident,fd.get('name').trim(),fd.get('class').trim(),fd.get('family').trim(),password)}
  else{const email=/^\d{7}$/.test(ident)?ident+'@lsts.edu.vn':ident;if(!/^[a-z0-9._+-]+@lsts\.edu\.vn$/.test(email))throw Error('Dùng mã học sinh 7 chữ số hoặc email trường.');await cloud.signIn(email,password)}
- modal.close();const key=pendingLesson,tool=pendingTool;pendingLesson=null;pendingTool=null;if(key)await lesson(key);else if(tool)openTool(tool);else home();toast('Đã đăng nhập. Tiến độ được lưu theo tài khoản.');
+ modal.close();const key=pendingLesson,tool=pendingTool;pendingLesson=null;pendingTool=null;if(key)await lesson(key,new URLSearchParams(location.search).has('cuoi')?5:Number(new URLSearchParams(location.search).get('chang')||0));else if(tool)openTool(tool);else home();toast('Đã đăng nhập. Tiến độ được lưu theo tài khoản.');
  }catch(err){$('#auth-error').textContent=authError(err)}finally{button.disabled=false}};
 }
 function authError(err){const m=String(err.message||'');if(/Invalid login credentials/i.test(m))return 'Mã/email hoặc mật khẩu chưa đúng.';if(/already registered/i.test(m))return 'Mã học sinh đã có tài khoản. Đăng nhập hoặc liên hệ giáo viên.';if(/rate limit/i.test(m))return 'Thao tác quá nhanh. Chờ một chút rồi thử lại.';if(/fetch|network/i.test(m))return 'Chưa kết nối được. Kiểm tra mạng và thử lại.';if(/Database error/i.test(m))return 'Thông tin đăng ký chưa hợp lệ hoặc mã đã tồn tại. Kiểm tra họ tên, lớp và mã 7 chữ số.';return m||'Chưa thực hiện được. Thử lại hoặc liên hệ giáo viên.'}
@@ -212,5 +212,5 @@ $('#home').onclick=home;$('#account').onclick=()=>auth();$('#staff').onclick=sta
 window.addEventListener('cloud-change',()=>{if(!cloud.user&&(current||activeView!=='home')){pendingDraft=null;clearTimeout(draftTimer);stopWorker();current=null;quiz=null;modal.close();home()}updateNav();showConflict()});
 window.addEventListener('hashchange',()=>{const key=location.hash.slice(1);if(['designer','projects'].includes(key)&&activeView!==key){openTool(key);return}if(C.lessons.some(l=>l.key===key)&&current?.key!==key)lesson(key).catch(e=>toast(authError(e)))});
 window.addEventListener('beforeunload',e=>{if(cloud.user&&(Object.keys(cloud.pending).length||cloud.practicePending()||auxiliary?.dirty?.())){e.preventDefault();e.returnValue=''}});
-(async()=>{try{await cloud.init();const key=location.hash.slice(1);if(C.lessons.some(l=>l.key===key))await lesson(key);else if(['designer','projects'].includes(key))openTool(key);else home()}catch{app.innerHTML='<section class="panel"><h2>Chưa kết nối được tài khoản</h2><p>Kiểm tra mạng rồi tải lại trang. Cần đăng nhập và tải nội dung thành công trước khi học.</p><button data-action="home">Mở lộ trình</button></section>';$('#sync').textContent='Chưa kết nối được · chưa có tiến độ tài khoản'}})();
+(async()=>{try{await cloud.init();const key=location.hash.slice(1);if(C.lessons.some(l=>l.key===key))await lesson(key,new URLSearchParams(location.search).has('cuoi')?5:Number(new URLSearchParams(location.search).get('chang')||0));else if(['designer','projects'].includes(key))openTool(key);else home()}catch{app.innerHTML='<section class="panel"><h2>Chưa kết nối được tài khoản</h2><p>Kiểm tra mạng rồi tải lại trang. Cần đăng nhập và tải nội dung thành công trước khi học.</p><button data-action="home">Mở lộ trình</button></section>';$('#sync').textContent='Chưa kết nối được · chưa có tiến độ tài khoản'}})();
 })();

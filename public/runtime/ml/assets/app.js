@@ -75,6 +75,8 @@
   function docLuu() { try { return JSON.parse(localStorage.getItem(LUU)) || {}; } catch (e) { return {}; } }
   var TT = docLuu();
   TT.qua = TT.qua || 0;
+  TT.passedStages = Array.isArray(TT.passedStages) ? TT.passedStages : Array.from({length:Math.min(TT.qua,B.chang.length)},function(_,i){return i;});
+  TT.finalPassed = Boolean(TT.finalPassed || TT.dat);
   TT.tl = TT.tl || {};          // câu trả lời đang làm: {id câu: chuỗi trả lời}
   TT.cuon = TT.cuon || {};      // vị trí cuộn từng chặng
   TT.lich_su = TT.lich_su || []; // [{ngay, diem}]
@@ -121,21 +123,21 @@
   }
   function capNhatDau() {
     var tong = B.chang.length + 1;
-    thanh.style.width = Math.round(100 * Math.min(TT.qua, tong) / tong) + "%";
+    thanh.style.width = Math.round(100 * Math.min(TT.passedStages.length+(TT.dat?1:0), tong) / tong) + "%";
     nguoiEl.textContent = TT.ten ? TT.ten + " · " + TT.lop : "";
   }
   function thanhChang(dang) {
     var wrap = el("nav", { class: "cac-chang", "aria-label": "Các chặng" });
     B.chang.forEach(function (c, i) {
-      var b = el("button", { text: (i < TT.qua ? "✓ " : "") + (i + 1) + ". " + c.ten_ngan, onclick: function () { moChang(i); } });
-      if (i < TT.qua) b.className = "xong";
+      var b = el("button", { text: (TT.passedStages.includes(i) ? "✓ " : "") + (i + 1) + ". " + c.ten_ngan, onclick: function () { moChang(i); } });
+      if (TT.passedStages.includes(i)) b.className = "xong";
       if (i === dang) b.className = "dang";
       if (i > TT.qua && !window.PORTAL_SELF_STUDY) b.disabled = true;
       wrap.appendChild(b);
     });
     var bc = el("button", { text: (TT.dat ? "✓ " : "") + "Checkpoint cuối", onclick: moCuoi });
     if (dang === "cuoi") bc.className = "dang";
-    if (TT.qua < B.chang.length) bc.disabled = true;
+    if (TT.qua < B.chang.length && !window.PORTAL_SELF_STUDY) bc.disabled = true;
     wrap.appendChild(bc);
     return wrap;
   }
@@ -269,7 +271,7 @@
       }
       var bd = el("div", { class: "ban-do" });
       B.chang.forEach(function (c, i) {
-        bd.appendChild(el("div", { class: i < TT.qua ? "xong" : "" }, [el("b", { text: (i < TT.qua ? "✓ " : "") + "Chặng " + (i + 1) + " · " + c.phut + " phút" }), c.ten]));
+        bd.appendChild(el("div", { class: TT.passedStages.includes(i) ? "xong" : "" }, [el("b", { text: (TT.passedStages.includes(i) ? "✓ " : "") + "Chặng " + (i + 1) + " · " + c.phut + " phút" }), c.ten]));
       });
       bd.appendChild(el("div", {}, [el("b", { text: "Checkpoint cuối" }), B.cuoi.so_cau + " câu · đạt " + B.cuoi.dat + "/" + B.cuoi.so_cau + " nhận chứng chỉ"]));
       them.appendChild(bd);
@@ -761,7 +763,7 @@
     var ck = el("section", { class: "the" });
     ck.appendChild(el("span", { class: "nhan", text: "Checkpoint chặng " + (i + 1) }));
     ck.appendChild(el("h2", { text: "Kiểm tra nhanh" }));
-    ck.appendChild(el("p", { text: i < TT.qua ? "Con đã qua chặng này. Có thể làm lại để ôn." :
+    ck.appendChild(el("p", { text: TT.passedStages.includes(i) ? "Con đã qua chặng này. Có thể làm lại để ôn." :
       "Trả lời đúng tất cả để mở chặng sau. Sai lần đầu: đọc gợi ý. Sai từ lần hai: xem lời giải chi tiết." }));
     var cau = c.checkpoint.map(function (q, j) { var v = veCau(q, j + 1, true); ck.appendChild(v.node); return v; });
     var tb = el("span", { class: "thong-bao" });
@@ -777,7 +779,9 @@
       var dung = cau.filter(function (v) { return v.cham(lan >= 1 ? "giai" : "goi_y"); }).length;
       if (dung === cau.length) {
         tb.className = "thong-bao tot"; tb.textContent = "Tuyệt — con đã qua chặng " + (i + 1) + ".";
-        if (TT.qua < i + 1) TT.qua = i + 1;
+        if (!TT.passedStages.includes(i)) TT.passedStages.push(i);
+        TT.qua = 0; while(TT.passedStages.includes(TT.qua)&&TT.qua<B.chang.length) TT.qua++;
+        TT.dat = TT.finalPassed && TT.passedStages.length === B.chang.length;
         ghi(); capNhatDau(); tiep.disabled = false;
       } else {
         TT.lan_sai[i] = lan + 1; ghi();
@@ -802,14 +806,14 @@
   }
   function moCuoi() {
     if (!TT.ten) { moDau(); return; }
-    if (TT.qua < B.chang.length) { moChang(TT.qua); return; }
+    if (TT.qua < B.chang.length && !window.PORTAL_SELF_STUDY) { moChang(TT.qua); return; }
     changDang = null;
     capNhatDau();
     main.innerHTML = "";
     main.appendChild(thanhChang("cuoi"));
     var t = el("section", { class: "the" });
     t.appendChild(el("span", { class: "nhan", text: "Checkpoint cuối bài" }));
-    t.appendChild(el("h2", { text: B.cuoi.so_cau + " câu — đạt " + B.cuoi.dat + " câu nhận chứng chỉ" }));
+    t.appendChild(el("h2", { text: B.cuoi.so_cau + " câu — đạt " + B.cuoi.dat + " câu và hoàn thành các chặng để nhận chứng chỉ" }));
     t.appendChild(el("ul", { class: "ds" }, [
       el("li", { html: "Đề gồm nhiều dạng: một đáp án, <b>nhiều đáp án</b> (đề ghi rõ chọn mấy), sắp xếp, điền khuyết, đúng/sai." }),
       el("li", { html: "Mỗi câu phải đúng trọn vẹn mới được tính — câu nhiều đáp án phải chọn đủ và không chọn thừa." }),
@@ -853,11 +857,11 @@
     var lai = el("button", { class: "nut phu", text: "Làm lại với đề mới", onclick: lamBai });
     if (diem >= B.cuoi.dat) {
       if (!TT.dat || diem > (TT.diem || 0)) { TT.diem = diem; TT.ngay_dat = ngayNay(); }
-      TT.dat = true; TT.qua = B.chang.length + 1; ghi(); capNhatDau();
-      r.appendChild(el("p", { html: "Con đã đạt. Tải chứng chỉ bên dưới rồi nộp theo hướng dẫn của thầy cô trên Canvas." }));
+      TT.finalPassed = true; TT.dat = TT.passedStages.length === B.chang.length; ghi(); capNhatDau();
+      r.appendChild(el("p", { html: TT.dat ? "Con đã hoàn thành bài. Tải chứng chỉ bên dưới." : "Con đã đạt checkpoint cuối. Hoàn thành các checkpoint chặng còn lại để nhận chứng chỉ bài." }));
       var cc = el("div", { class: "chung-chi" });
       r.appendChild(cc);
-      veChungChi(TT.diem, TT.ngay_dat, cc);
+      if(TT.dat) veChungChi(TT.diem, TT.ngay_dat, cc);
     } else {
       r.appendChild(el("p", { html: "Cần ít nhất " + B.cuoi.dat + " câu đúng. Xem lời giải ở từng câu phía trên, " +
         "mở lại chặng nào còn chưa chắc, rồi làm đề mới." }));
