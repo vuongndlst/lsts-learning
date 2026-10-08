@@ -684,7 +684,7 @@ let khungMo = false, moLucQua = 0;
 function moKhung(src, tieu_de) {
   khungMo = true; khungTieuDe.textContent = tieu_de;
   moLucQua = qua();
-  const u=new URL(src,location.href),q=new URLSearchParams(location.search);u.searchParams.set('class',q.get('class'));u.searchParams.set('lesson',q.get('lesson'));u.searchParams.set('personal',q.get('personal')||'0');u.searchParams.set('mode','read');if(q.get('guest')==='1')u.searchParams.set('guest','1');iframe.src=u.href; khung.classList.add("hien");
+  const u=new URL(src,location.href),q=new URLSearchParams(location.search);u.searchParams.set('class',q.get('class'));u.searchParams.set('lesson',q.get('lesson'));u.searchParams.set('personal',q.get('personal')||'0');u.searchParams.set('mode','read');u.searchParams.set('v',window.PORTAL_RUNTIME_VERSION);if(q.get('guest')==='1')u.searchParams.set('guest','1');iframe.src=u.href; khung.classList.add("hien");
   SFX.mo(); nhacNho(true); if (AM.u) AM.u.gain.value = 0;
   PHIM.clear(); CAN.hoat = false;
   setTimeout(() => khungDong.focus(), 50);

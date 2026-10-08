@@ -1,6 +1,7 @@
 /* Shared island navigator. The original lesson engines still grade and save work. */
 window.CourseWorld=async(p,C,originBase)=>{
- const kind=p.payload.kind,script=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=new URL(src,originBase);s.onload=resolve;s.onerror=reject;document.head.append(s)});
+ const asset=src=>{const u=new URL(src,originBase);u.searchParams.set('v',window.PORTAL_RUNTIME_VERSION);return u.href};
+ const kind=p.payload.kind,script=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=asset(src);s.onload=resolve;s.onerror=reject;document.head.append(s)});
  let steps;
  if(kind==='sql')steps=[...p.payload.lesson.stages.map(x=>({title:x.title})),{title:'Phòng thực hành SQL'}];
  else {await script(kind+'/engine/kit.js');const source=document.createElement('script');source.textContent=p.payload.source;document.head.append(source);source.remove();steps=LESSON.steps.filter(x=>x.kind!=='gate'&&x.kind!=='boss');}
@@ -11,10 +12,10 @@ window.CourseWorld=async(p,C,originBase)=>{
  const progress=()=>{const state=C.peek();const completed=Boolean(state.completed||state.completedAt);const done=steps.map((s,i)=>kind==='sql'?(i<4?state.passed?.includes(i):i===4?state.taskDone:state.completed):(s.challenges||[]).filter(c=>!c.advanced&&!c.bonus).every(c=>state.passed?.[c.id]));let qua=0;for(const d of done){if(!d)break;qua++}return {...state,passedStages:done.flatMap((yes,i)=>yes?[i]:[]),qua,dat:completed,ten:C.profile.display_name,lop:C.profile.class_label}};
  Storage.prototype.getItem=function(k){return this===localStorage&&k===key?JSON.stringify(progress()):originalGet.call(this,k)};
  window.QUEST={...world,ten:'Đảo '+world.bieu_tuong+' · '+p.lesson.title,mau_phu:'#FFD07A',dung_sau_chang:false,trang_doc:new URL('lesson.html',originBase).href};
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('ml/assets/quest3d.css',originBase);document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=asset('ml/assets/quest3d.css');document.head.append(css);
  const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports:{three:'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js'}});document.head.append(map);
  document.body.innerHTML='<div id="quest"></div>';
- const m=document.createElement('script');m.type='module';m.src=new URL('ml/assets/quest3d.js',originBase);document.head.append(m);
+ const m=document.createElement('script');m.type='module';m.src=asset('ml/assets/quest3d.js');document.head.append(m);
  addEventListener('storage',e=>{if(e.key!==key)dispatchEvent(new StorageEvent('storage',{key}))});
  const child=()=>document.querySelector('.q-khung iframe')?.contentWindow;
  addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.source===child()&&e.data?.type==='portal-status'){C.setNestedPending(e.data.pending);parent.postMessage(e.data,location.origin)}if(e.source===parent&&['portal-flush','portal-download'].includes(e.data?.type)&&child())child().postMessage(e.data,location.origin)});

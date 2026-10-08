@@ -1,7 +1,8 @@
 (async()=>{'use strict';
  const originBase=new URL('.',location.href),C=PortalCloud;
- const script=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=new URL(src,originBase);s.onload=resolve;s.onerror=()=>reject(Error('asset_failed'));document.head.append(s)});
- const css=href=>{const l=document.createElement('link');l.rel='stylesheet';l.href=new URL(href,originBase);document.head.append(l)};
+ const asset=src=>{const u=new URL(src,originBase);u.searchParams.set('v',window.PORTAL_RUNTIME_VERSION);return u.href};
+ const script=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=asset(src);s.onload=resolve;s.onerror=()=>reject(Error('asset_failed'));document.head.append(s)});
+ const css=href=>{const l=document.createElement('link');l.rel='stylesheet';l.href=asset(href);document.head.append(l)};
  const base=href=>{const b=document.createElement('base');b.href=new URL(href,originBase);document.head.prepend(b)};
  const account=()=>({name:C.profile.display_name,className:C.profile.class_label,studentCode:C.profile.student_code,userId:C.user.id});
  try{
@@ -30,7 +31,7 @@
  css('ml/assets/quest3d.css');const map=document.createElement('script');map.type='importmap';map.textContent=JSON.stringify({imports:{three:'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js'}});document.head.append(map);
  window.QUEST={...(window.THE_GIOI?.[BAI.ma]||{}),dung_sau_chang:false,trang_doc:new URL('lesson.html',originBase).href};document.body.innerHTML='<div id="quest"></div>';
  const fallback=setTimeout(()=>{if(!document.querySelector('#quest canvas')){const u=new URL('lesson.html',originBase);u.search=location.search;u.searchParams.set('mode','read');location.replace(u.href)}},15000);
- const module=document.createElement('script');module.type='module';module.src=new URL('ml/assets/quest3d.js',originBase);document.head.append(module);
+ const module=document.createElement('script');module.type='module';module.src=asset('ml/assets/quest3d.js');document.head.append(module);
  addEventListener('storage',e=>{if(e.key?.includes(p.enrollment_id)||e.key?.includes(p.lesson.lesson_id))dispatchEvent(new StorageEvent('storage',{key}))});
  const nested=()=>document.querySelector('.q-khung iframe')?.contentWindow;
  addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.source===nested()&&e.data?.type==='portal-status'){C.setNestedPending(e.data.pending);parent.postMessage(e.data,location.origin)}if(e.source===parent&&['portal-flush','portal-download'].includes(e.data?.type)&&nested())nested().postMessage(e.data,location.origin)});
